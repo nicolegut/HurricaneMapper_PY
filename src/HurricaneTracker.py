@@ -20,7 +20,7 @@ arcpy.env.overwriteOutput = True
 
 # %%
 #Set storm variable
-storm_season = 2024
+storm_season = 2000
 storm_name = "HELENE"
 affected_counties = processed_folder_path / 'affected_counties.shp'
 
@@ -29,6 +29,34 @@ ibtracs_NA_points = str(raw_folder_path /'IBTrACS_NA.shp')
 usa_counties = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_Counties_Generalized_Boundaries/FeatureServer/0'
 storm_track_points =  "memory\\track_points"
 storm_track_line = "memory\\Tracklines"
+
+#%%
+#initialize storm name list
+storm_names = []
+
+#create list of storms
+cursor = arcpy.da.SearchCursor(
+    in_table = ibtracs_NA_points, 
+    where_clause = f'SEASON = {storm_season}',
+    field_names = ['NAME']
+)
+
+#with arcpy.da.SearchCursor(
+   # in_table = ibtracs_NA_points, 
+   # where_clause = f'SEASON = {storm_season}',
+   # field_names = ['NAME']
+#) as cursor: 
+    ###code chunk and then cursor auto-deletes
+
+
+for row in cursor:
+   stormname = row[0]
+   #append to list 
+   if not stormname in storm_names and stormname != 'UNNAMED':
+    storm_names.append(stormname)
+
+#delete cursor
+del cursor
 
 # %% [markdown]
 # #### Select point features corresponding to a specific storm (season & name)
@@ -52,6 +80,8 @@ arcpy.management.PointsToLine(
     Sort_Field='ISO_TIME'
 )
 
+
+
 # %% [markdown]
 # #### Select Counties Intersecting Point
 
@@ -64,11 +94,15 @@ select_output = arcpy.management.SelectLayerByLocation(
     )
 select_result = select_output.getOutput(0)
 
-# %%
-#Copy selected counties to output feature class
-arcpy.management.CopyFeatures(
-    in_features = select_result, 
-    out_feature_class = str(affected_counties)
-)
 
+# %% [markdown]
+# #### Count the Counties
+
+#%%
+#count the counties
+
+county_count = int(arcpy.GetCount_management(select_result).getOutput(0))
+
+
+# %%
 
