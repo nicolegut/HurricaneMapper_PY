@@ -2,8 +2,8 @@
 # ## Hurricane Tracking Workflow
 # This notebook selects trackpoints from a features class of trackpoints for a selected storm (season & name), creates a track line, and extracts US counties that intersect that trackline. 
 # 
-# Fall 202X  
-# John.Fay@duke.edu
+# Fall 2025  
+# nicole.gutkowski@duke.edu
 
 # %%
 #Import package
@@ -19,10 +19,8 @@ arcpy.env.workspace = str(raw_folder_path)
 arcpy.env.overwriteOutput = True
 
 # %%
-#Set storm variable
-storm_season = 2000
-storm_name = "HELENE"
-affected_counties = processed_folder_path / 'affected_counties.shp'
+#set output csv file
+output_csv = Path.cwd().parent / 'data' / 'processed' / 'AffectedCounty.csv'
 
 #Set model layers
 ibtracs_NA_points = str(raw_folder_path /'IBTrACS_NA.shp')
@@ -69,9 +67,13 @@ for storm_season in range(2000,2004):
 # #### Select point features corresponding to a specific storm (season & name)
 
 # %%
+out_file = open(output_csv, 'w')
+
+out_file.write('Storm_Season, Counties_Impacted\n')
+
 
 #iterate through keys in the dictionary
-for storm_season in storm_dict.keys:
+for storm_season in storm_dict.keys():
     #get list of storms
     storm_names = storm_dict[storm_season]
 
@@ -79,6 +81,8 @@ for storm_season in storm_dict.keys:
 
 #iterate through storms
     for storm_name in storm_names:
+
+        print("Working on {storm_name} and {storm_season}")
 #Select points for a given storm
         arcpy.analysis.Select(
             in_features=ibtracs_NA_points, 
@@ -106,14 +110,7 @@ for storm_season in storm_dict.keys:
         print(storm_name, storm_season, county_count, storm_count)
 
 
-# %% [markdown]
-# #### Count the Counties
-
-#%%
-#count the counties
-
 
 
 
 # %%
-
